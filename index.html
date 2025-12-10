@@ -6,11 +6,12 @@
     <title>WildGuard - 守护自然</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
       body {
         font-family: 'Noto Sans SC', sans-serif;
       }
-      /* Custom scrollbar for webkit */
+      /* Custom scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
       }
@@ -24,20 +25,491 @@
       ::-webkit-scrollbar-thumb:hover {
         background: #059669; 
       }
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
     </style>
   <script type="importmap">
 {
   "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.1/",
     "@google/genai": "https://esm.sh/@google/genai@^1.32.0",
+    "react": "https://esm.sh/react@^19.2.1",
     "lucide-react": "https://esm.sh/lucide-react@^0.559.0",
-    "react/": "https://esm.sh/react@^19.2.1/",
-    "react": "https://esm.sh/react@^19.2.1"
+    "react/": "https://esm.sh/react@^19.2.1/"
   }
 }
 </script>
 </head>
-  <body class="bg-stone-50 text-stone-800">
-    <div id="root"></div>
+  <body class="bg-stone-50 text-stone-800 flex flex-col min-h-screen">
+    
+    <!-- Navigation -->
+    <header class="sticky top-0 z-50 bg-emerald-900/95 backdrop-blur-sm text-white shadow-lg">
+      <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <!-- Logo -->
+        <div class="flex items-center space-x-2 cursor-pointer group" onclick="app.navigate('home')">
+          <div class="bg-emerald-500 p-2 rounded-full group-hover:bg-emerald-400 transition-colors">
+            <i data-lucide="leaf" class="text-white w-6 h-6"></i>
+          </div>
+          <span class="text-xl font-bold tracking-wide">WildGuard</span>
+        </div>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex space-x-8">
+          <button onclick="app.navigate('home')" id="nav-home" class="flex items-center space-x-1 px-3 py-2 rounded-lg transition-all duration-200 bg-emerald-700 text-white shadow-md">
+            <i data-lucide="home" class="w-4 h-4"></i>
+            <span>首页</span>
+          </button>
+          <button onclick="app.navigate('chat')" id="nav-chat" class="flex items-center space-x-1 px-3 py-2 rounded-lg transition-all duration-200 text-emerald-100 hover:bg-emerald-800 hover:text-white">
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+            <span>AI 专家问答</span>
+          </button>
+        </nav>
+
+        <!-- Mobile Menu Button -->
+        <button class="md:hidden text-emerald-100 hover:text-white" onclick="app.toggleMenu()">
+          <i data-lucide="menu" class="w-7 h-7"></i>
+        </button>
+      </div>
+
+      <!-- Mobile Nav -->
+      <div id="mobile-menu" class="hidden md:hidden bg-emerald-800 border-t border-emerald-700">
+        <div class="flex flex-col p-4 space-y-2">
+          <button onclick="app.navigate('home')" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-emerald-100 hover:bg-emerald-700 w-full text-left">
+            <i data-lucide="home" class="w-5 h-5"></i>
+            <span>首页</span>
+          </button>
+          <button onclick="app.navigate('chat')" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-emerald-100 hover:bg-emerald-700 w-full text-left">
+            <i data-lucide="message-circle" class="w-5 h-5"></i>
+            <span>AI 专家问答</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+      
+      <!-- HOME VIEW -->
+      <div id="view-home">
+        <!-- Hero Section -->
+        <div class="relative bg-stone-900 overflow-hidden">
+          <div class="absolute inset-0 z-0">
+            <img src="https://picsum.photos/id/237/1920/1080" alt="Wildlife" class="w-full h-full object-cover opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/60 to-transparent"></div>
+          </div>
+
+          <div class="relative z-10 container mx-auto px-4 py-20 md:py-32 lg:py-40 flex flex-col items-center text-center">
+            <div class="inline-flex items-center space-x-2 bg-emerald-500/20 text-emerald-300 px-4 py-1.5 rounded-full backdrop-blur-md border border-emerald-500/30 mb-8 animate-fade-in-up">
+              <i data-lucide="globe" class="w-4 h-4"></i>
+              <span class="text-sm font-medium">地球是我们共同的家园</span>
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-tight max-w-4xl">
+              每一个生命 <br class="hidden md:block" />
+              <span class="text-emerald-400">都值得被温柔以待</span>
+            </h1>
+            
+            <p class="text-lg md:text-xl text-stone-200 mb-10 max-w-2xl leading-relaxed">
+              加入我们的行动，探索野生动物的奇妙世界。了解它们面临的挑战，并发现我们可以如何携手保护这些珍贵的生命。
+            </p>
+
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+              <button onclick="app.navigate('chat')" class="group flex items-center justify-center space-x-2 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold py-3.5 px-8 rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transform hover:-translate-y-1">
+                <span>咨询 AI 专家</span>
+                <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+              </button>
+              
+              <button onclick="document.getElementById('learn-more').scrollIntoView({ behavior: 'smooth' })" class="flex items-center justify-center space-x-2 bg-white/10 hover:bg-white/20 text-white font-medium py-3.5 px-8 rounded-full backdrop-blur-md border border-white/20 transition-all duration-300">
+                <i data-lucide="heart" class="w-5 h-5"></i>
+                <span>了解更多</span>
+              </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 border-t border-white/10 pt-8 w-full max-w-4xl">
+              <div class="text-center">
+                <div class="text-3xl font-bold text-white mb-1">42,000+</div>
+                <div class="text-stone-400 text-sm">世界自然保护联盟濒危物种</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl font-bold text-white mb-1">68%</div>
+                <div class="text-stone-400 text-sm">自1970年以来野生动物种群下降</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl font-bold text-white mb-1">1</div>
+                <div class="text-stone-400 text-sm">地球，我们唯一的家园</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Cards -->
+        <section id="learn-more" class="py-20 bg-stone-100">
+          <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+              <h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-4">关注濒危物种</h2>
+              <p class="text-stone-600 max-w-2xl mx-auto">
+                生物多样性是地球生态系统的基础。了解这些美丽的生灵，是我们保护它们的第一步。
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="animal-grid">
+              <!-- Animal Cards will be injected here by JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="bg-emerald-900 text-white py-20">
+           <div class="container mx-auto px-4 text-center">
+             <h2 class="text-3xl font-bold mb-6">准备好成为改变的一部分了吗？</h2>
+             <p class="text-emerald-100 mb-8 max-w-2xl mx-auto">
+               无论是通过学习知识、捐赠支持，还是在日常生活中做出环保选择，您的每一个行动都至关重要。
+             </p>
+             <button onclick="app.navigate('chat')" class="bg-white text-emerald-900 font-bold py-3 px-8 rounded-full hover:bg-emerald-50 transition-colors shadow-lg">
+               开始探索
+             </button>
+           </div>
+        </section>
+      </div>
+
+      <!-- CHAT VIEW -->
+      <div id="view-chat" class="hidden h-[calc(100vh-80px)] flex flex-col bg-stone-50">
+        <div class="bg-emerald-800 text-white py-4 px-6 shadow-md flex items-center space-x-3">
+          <i data-lucide="sparkles" class="text-yellow-400 w-5 h-5"></i>
+          <div>
+            <h2 class="text-lg font-bold">自然守护者 AI</h2>
+            <p class="text-xs text-emerald-200">基于 Google Gemini 技术驱动</p>
+          </div>
+        </div>
+
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+          <!-- Messages will appear here -->
+          <div class="flex w-full justify-start">
+            <div class="flex max-w-[85%] md:max-w-[70%] flex-row items-start gap-3">
+              <div class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-sm">
+                <i data-lucide="bot" class="w-5 h-5"></i>
+              </div>
+              <div class="bg-emerald-50 border border-emerald-100 text-stone-800 p-4 rounded-2xl rounded-tl-none shadow-sm leading-relaxed">
+                <div class="whitespace-pre-wrap">你好！我是你的自然守护者 AI 助手。你可以问我关于野生动物保护、濒危物种或环保行动的任何问题。</div>
+                <div class="text-[10px] mt-2 opacity-60 text-left">刚刚</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="chat-loading" class="hidden flex justify-start w-full px-4 md:px-6 mb-4">
+           <div class="flex max-w-[85%] flex-row items-start gap-3">
+              <div class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-sm">
+                <i data-lucide="bot" class="w-5 h-5"></i>
+              </div>
+              <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl rounded-tl-none flex items-center">
+                <i data-lucide="loader-2" class="animate-spin text-emerald-600 mr-2 w-4 h-4"></i>
+                <span class="text-sm text-stone-500">正在思考...</span>
+              </div>
+           </div>
+        </div>
+
+        <div class="p-4 bg-white border-t border-stone-200">
+          <form onsubmit="app.handleChatSubmit(event)" class="max-w-4xl mx-auto relative flex items-center">
+            <input
+              type="text"
+              id="chat-input"
+              placeholder="询问关于雪豹、雨林保护或如何减少碳足迹..."
+              class="w-full pl-5 pr-14 py-4 rounded-full bg-stone-100 border border-stone-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200 outline-none transition-all placeholder-stone-400"
+            />
+            <button
+              type="submit"
+              id="chat-send-btn"
+              disabled
+              class="absolute right-2 p-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-stone-300 rounded-full text-white transition-colors shadow-sm"
+            >
+              <i data-lucide="send" class="w-5 h-5"></i>
+            </button>
+          </form>
+          <div class="text-center mt-2 text-xs text-stone-400">
+            AI 可能会产生不准确的信息，请核实重要事实。
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer id="main-footer" class="bg-stone-900 text-stone-400 py-12">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="mb-6 md:mb-0">
+            <h3 class="text-2xl font-bold text-white mb-2">WildGuard</h3>
+            <p className="text-sm max-w-md">
+              致力于通过技术连接人与自然，唤醒公众的保护意识。
+            </p>
+          </div>
+          
+          <div class="flex space-x-6">
+            <a href="#" class="hover:text-emerald-400 transition-colors"><i data-lucide="twitter" class="w-6 h-6"></i></a>
+            <a href="#" class="hover:text-emerald-400 transition-colors"><i data-lucide="instagram" class="w-6 h-6"></i></a>
+            <a href="#" class="hover:text-emerald-400 transition-colors"><i data-lucide="github" class="w-6 h-6"></i></a>
+          </div>
+        </div>
+        
+        <div class="border-t border-stone-800 mt-8 pt-8 text-center text-sm">
+          <p>&copy; <span id="year"></span> WildGuard Project. All rights reserved.</p>
+          <p class="mt-2 text-stone-600">Generated with Gemini API</p>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module">
+      import { GoogleGenAI } from "@google/genai";
+
+      // --- Configuration ---
+      const API_KEY = process.env.API_KEY; 
+      const ai = new GoogleGenAI({ apiKey: API_KEY });
+      const SYSTEM_INSTRUCTION = `
+        你是一位充满热情的野生动物保护专家和教育家。你的名字叫“自然守护者”。
+        你的任务是回答用户关于动物、生态系统、濒危物种保护以及如何参与环保行动的问题。
+        请用通俗易懂、生动有趣的语言回答，适合所有年龄段的受众。
+        如果用户询问如何帮助，请提供切实可行的建议（如减少塑料使用、支持保护组织等）。
+        严禁提供非法野生动物贸易相关的信息，并强烈谴责此类行为。
+      `;
+
+      // --- State ---
+      const state = {
+        currentPage: 'home', // 'home' | 'chat'
+        chatHistory: [],
+        animals: [
+          { title: "雪豹 (Snow Leopard)", description: "加载中...", imageUrl: "https://picsum.photos/id/1025/600/400", tag: "极危" },
+          { title: "绿海龟 (Green Sea Turtle)", description: "加载中...", imageUrl: "https://picsum.photos/id/10/600/400", tag: "濒危" },
+          { title: "非洲象 (African Elephant)", description: "加载中...", imageUrl: "https://picsum.photos/id/1074/600/400", tag: "易危" }
+        ],
+        isLoadingChat: false
+      };
+
+      // --- DOM Elements ---
+      const els = {
+        viewHome: document.getElementById('view-home'),
+        viewChat: document.getElementById('view-chat'),
+        navHome: document.getElementById('nav-home'),
+        navChat: document.getElementById('nav-chat'),
+        footer: document.getElementById('main-footer'),
+        mobileMenu: document.getElementById('mobile-menu'),
+        animalGrid: document.getElementById('animal-grid'),
+        chatMessages: document.getElementById('chat-messages'),
+        chatInput: document.getElementById('chat-input'),
+        chatSendBtn: document.getElementById('chat-send-btn'),
+        chatLoading: document.getElementById('chat-loading'),
+        year: document.getElementById('year')
+      };
+
+      // --- Functions ---
+      
+      // Navigation
+      function navigate(page) {
+        state.currentPage = page;
+        
+        if (page === 'home') {
+          els.viewHome.classList.remove('hidden');
+          els.viewChat.classList.add('hidden');
+          els.footer.classList.remove('hidden');
+          
+          els.navHome.classList.add('bg-emerald-700', 'text-white', 'shadow-md');
+          els.navHome.classList.remove('text-emerald-100', 'hover:bg-emerald-800');
+          
+          els.navChat.classList.remove('bg-emerald-700', 'text-white', 'shadow-md');
+          els.navChat.classList.add('text-emerald-100', 'hover:bg-emerald-800');
+        } else {
+          els.viewHome.classList.add('hidden');
+          els.viewChat.classList.remove('hidden');
+          els.footer.classList.add('hidden');
+
+          els.navChat.classList.add('bg-emerald-700', 'text-white', 'shadow-md');
+          els.navChat.classList.remove('text-emerald-100', 'hover:bg-emerald-800');
+
+          els.navHome.classList.remove('bg-emerald-700', 'text-white', 'shadow-md');
+          els.navHome.classList.add('text-emerald-100', 'hover:bg-emerald-800');
+          
+          scrollToBottom();
+        }
+        
+        // Close mobile menu if open
+        els.mobileMenu.classList.add('hidden');
+        
+        // Re-initialize icons just in case (sometimes needed for dynamically shown content)
+        lucide.createIcons();
+      }
+
+      function toggleMenu() {
+        els.mobileMenu.classList.toggle('hidden');
+      }
+
+      // Animal Cards
+      async function renderAnimals() {
+        els.animalGrid.innerHTML = state.animals.map((animal, index) => `
+          <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group fade-in" style="animation-delay: ${index * 100}ms">
+            <div class="relative h-64 overflow-hidden">
+              <img src="${animal.imageUrl}" alt="${animal.title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+              <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                ${animal.tag}
+              </div>
+            </div>
+            <div class="p-8">
+              <h3 class="text-xl font-bold text-stone-800 mb-3">${animal.title}</h3>
+              <p class="text-stone-600 leading-relaxed text-sm animal-desc" id="desc-${index}">
+                ${animal.description}
+              </p>
+              <div class="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between">
+                <span class="text-emerald-600 text-sm font-medium hover:text-emerald-500 cursor-pointer flex items-center gap-1">
+                   阅读更多 <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+        lucide.createIcons();
+
+        // Fetch descriptions
+        for (let i = 0; i < state.animals.length; i++) {
+          const animal = state.animals[i];
+          try {
+             const response = await ai.models.generateContent({
+              model: 'gemini-2.5-flash',
+              contents: `用一段简短、优美且富有教育意义的文字描述${animal.title}，强调其在生态系统中的重要性。限制在100字以内。`,
+            });
+            const text = response.text || "暂无描述";
+            const el = document.getElementById(`desc-${i}`);
+            if (el) el.innerText = text;
+          } catch (e) {
+            console.error("Failed to fetch desc", e);
+            const el = document.getElementById(`desc-${i}`);
+            if (el) el.innerText = "暂时无法获取描述。";
+          }
+        }
+      }
+
+      // Chat Logic
+      function scrollToBottom() {
+        els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+      }
+
+      function appendMessage(role, text) {
+        const isUser = role === 'user';
+        const div = document.createElement('div');
+        div.className = `flex w-full ${isUser ? 'justify-end' : 'justify-start'} fade-in`;
+        
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        div.innerHTML = `
+          <div class="flex max-w-[85%] md:max-w-[70%] ${isUser ? 'flex-row-reverse' : 'flex-row'} items-start gap-3">
+            <div class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-sm ${isUser ? 'bg-stone-700 text-white' : 'bg-emerald-600 text-white'}">
+              <i data-lucide="${isUser ? 'user' : 'bot'}" class="w-5 h-5"></i>
+            </div>
+            <div class="p-4 rounded-2xl shadow-sm leading-relaxed ${isUser ? 'bg-white border border-stone-100 text-stone-800 rounded-tr-none' : 'bg-emerald-50 border border-emerald-100 text-stone-800 rounded-tl-none'}">
+              <div class="whitespace-pre-wrap">${text}</div>
+              <div class="text-[10px] mt-2 opacity-60 ${isUser ? 'text-right' : 'text-left'}">${time}</div>
+            </div>
+          </div>
+        `;
+        
+        els.chatMessages.appendChild(div);
+        lucide.createIcons();
+        scrollToBottom();
+      }
+
+      async function handleChatSubmit(e) {
+        e.preventDefault();
+        const text = els.chatInput.value.trim();
+        if (!text || state.isLoadingChat) return;
+
+        // User message
+        appendMessage('user', text);
+        els.chatInput.value = '';
+        els.chatSendBtn.disabled = true;
+        
+        state.isLoadingChat = true;
+        els.chatLoading.classList.remove('hidden');
+        scrollToBottom();
+
+        // Prepare streaming response container (simplification: just accumulate text and show final or chunk update)
+        // For standard "appendMessage" style, we'll wait for chunks and update a single bubble.
+        
+        // Create model bubble first
+        const modelMsgId = 'msg-' + Date.now();
+        const div = document.createElement('div');
+        div.className = `flex w-full justify-start fade-in`;
+        div.innerHTML = `
+          <div class="flex max-w-[85%] md:max-w-[70%] flex-row items-start gap-3">
+            <div class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-sm">
+              <i data-lucide="bot" class="w-5 h-5"></i>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-100 text-stone-800 p-4 rounded-2xl rounded-tl-none shadow-sm leading-relaxed">
+              <div class="whitespace-pre-wrap" id="${modelMsgId}"></div>
+              <div class="text-[10px] mt-2 opacity-60 text-left">刚刚</div>
+            </div>
+          </div>
+        `;
+        els.chatMessages.appendChild(div);
+        lucide.createIcons();
+        const contentEl = document.getElementById(modelMsgId);
+
+        try {
+          // Chat instance
+          if (!state.chatSession) {
+             state.chatSession = ai.chats.create({
+              model: 'gemini-2.5-flash',
+              config: {
+                systemInstruction: SYSTEM_INSTRUCTION,
+                temperature: 0.7,
+              },
+            });
+          }
+
+          const responseStream = await state.chatSession.sendMessageStream({ message: text });
+          els.chatLoading.classList.add('hidden'); // Hide loading once stream starts
+          
+          let fullText = '';
+          for await (const chunk of responseStream) {
+            const newText = chunk.text;
+            if (newText) {
+              fullText += newText;
+              contentEl.innerText = fullText;
+              scrollToBottom();
+            }
+          }
+
+        } catch (error) {
+          console.error(error);
+          contentEl.innerText = "抱歉，我现在遇到了一些连接问题，请稍后再试。";
+          els.chatLoading.classList.add('hidden');
+        } finally {
+          state.isLoadingChat = false;
+        }
+      }
+
+      // Input listener
+      els.chatInput.addEventListener('input', (e) => {
+        els.chatSendBtn.disabled = !e.target.value.trim() || state.isLoadingChat;
+      });
+
+      // --- Initialization ---
+      window.app = {
+        navigate,
+        toggleMenu,
+        handleChatSubmit
+      };
+
+      // Set year
+      els.year.innerText = new Date().getFullYear();
+
+      // Start
+      lucide.createIcons();
+      renderAnimals();
+      
+    </script>
   </body>
 </html>
